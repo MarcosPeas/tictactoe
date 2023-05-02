@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::domain::tile::tile::{PieceType, Tile};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Board {
     tiles: HashMap<String, Tile>,
     with: u8,
@@ -194,6 +196,35 @@ impl Board {
             tiles_finisheds.push(tile20);
         }
         tiles_finisheds
+    }
+
+    pub fn reverse(&self) -> Board {
+        let mut tiles: HashMap<String, Tile> = HashMap::new();
+        for x in 0..self.height {
+            for y in 0..self.with {
+                let id = format!("{}-{}", x, y);
+                let current_tile = self.tiles[&id];
+                if current_tile.piece == PieceType::A {
+                    let mut tile = Tile::new(x, y);
+                    tile.add_piece(PieceType::B);
+                    tiles.insert(id.clone(),tile);
+                } else if current_tile.piece == PieceType::B {
+                    let mut tile = Tile::new(x, y);
+                    tile.add_piece(PieceType::A);
+                    tiles.insert(id.clone(),tile);
+                } else {
+                    let mut tile = Tile::new(x, y);
+                    tile.add_piece(PieceType::None);
+                    tiles.insert(id.clone(),tile);
+                }
+            }
+        }
+        let board = Board {
+            tiles,
+            with: self.with,
+            height: self.height,
+        };
+        board
     }
 }
 

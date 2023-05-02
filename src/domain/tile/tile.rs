@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, PartialEq, Eq, Copy)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Copy)]
 pub struct Tile {
     pub x: u8,
     pub y: u8,
@@ -23,7 +25,7 @@ impl Tile {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Copy)]
 pub enum PieceType {
     A,
     B,
