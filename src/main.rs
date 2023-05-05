@@ -1,6 +1,3 @@
-use std::ffi::{CString, CStr};
-
-use domain::{tile::tile::Tile, minmax::min_max_v2::MinMax};
 use infra::presenter::min_max_input::MinMaxInput;
 
 use crate::domain::tile::tile::PieceType;

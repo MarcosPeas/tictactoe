@@ -7,7 +7,7 @@ use crate::domain::tile::tile::{PieceType, Tile};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Board {
     tiles: HashMap<String, Tile>,
-    with: u8,
+    width: u8,
     height: u8,
 }
 
@@ -19,7 +19,7 @@ impl Board {
     pub fn from_size(x: u8, y: u8) -> Self {
         let mut board = Board {
             tiles: HashMap::default(),
-            with: y,
+            width: y,
             height: x,
         };
         for _x in 0..x {
@@ -45,7 +45,7 @@ impl Board {
             return RoundResult::B(result);
         }
         if self.is_full() {
-            return RoundResult::Drow;
+            return RoundResult::Draw;
         }
         RoundResult::NoFinished
     }
@@ -53,7 +53,7 @@ impl Board {
     pub fn is_full(&self) -> bool {
         let tiles = self.tiles.clone();
         for _x in 0..self.height {
-            for _y in 0..self.with {
+            for _y in 0..self.width {
                 let id = format!("{}-{}", _x, _y);
                 let tile = tiles.get(&id).unwrap().clone();
                 if tile.piece == PieceType::None {
@@ -68,7 +68,7 @@ impl Board {
         let tiles = self.tiles.clone();
         let mut free_tiles: Vec<Tile> = Vec::new();
         for _x in 0..self.height {
-            for _y in 0..self.with {
+            for _y in 0..self.width {
                 let id = format!("{}-{}", _x, _y);
                 let tile = tiles.get(&id).unwrap().clone();
                 if tile.piece == PieceType::None {
@@ -201,7 +201,7 @@ impl Board {
     pub fn reverse(&self) -> Board {
         let mut tiles: HashMap<String, Tile> = HashMap::new();
         for x in 0..self.height {
-            for y in 0..self.with {
+            for y in 0..self.width {
                 let id = format!("{}-{}", x, y);
                 let current_tile = self.tiles[&id];
                 if current_tile.piece == PieceType::A {
@@ -221,7 +221,7 @@ impl Board {
         }
         let board = Board {
             tiles,
-            with: self.with,
+            width: self.width,
             height: self.height,
         };
         board
@@ -232,6 +232,6 @@ impl Board {
 pub enum RoundResult {
     A(Vec<Tile>),
     B(Vec<Tile>),
-    Drow,
+    Draw,
     NoFinished,
 }

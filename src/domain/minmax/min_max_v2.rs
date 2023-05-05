@@ -1,5 +1,5 @@
 use std::{
-    sync::mpsc::{self, Sender},
+    sync::mpsc,
     thread,
 };
 
@@ -21,10 +21,8 @@ impl MinMax {
         let moves = board.get_valids_moves();
         println!("Valid moves: {}", moves.len());
         if moves.len() >= 20 {
-            println!("{}", "Run in multithread");
             return self.execute_on_multi_thread(board, piece_type);
         }
-        println!("{}", "Run in siglethread");
         return self.execute_on_sigle_thread(board, piece_type);
     }
 
@@ -75,13 +73,11 @@ impl MinMax {
         thread::spawn(move || {
             tx.send(i8::MIN).unwrap();
         });
-        let clon = rx.into_iter();
-        for received in clon {
+        let clonned = rx.into_iter();
+        for received in clonned {
             if received != i8::MIN {
                 points_result.push(received);
-            } else {
-                println!("{:?}", i8::MIN);
-            }
+            } 
         }
 
         return self.better_value(valid_moves, points_result);
@@ -92,7 +88,7 @@ impl MinMax {
         match result {
             crate::domain::board::board::RoundResult::A(_) => 1,
             crate::domain::board::board::RoundResult::B(_) => -1,
-            crate::domain::board::board::RoundResult::Drow => 0,
+            crate::domain::board::board::RoundResult::Draw => 0,
             crate::domain::board::board::RoundResult::NoFinished => {
                 let mut points: Vec<i8> = Vec::new();
                 let moves = board.get_valids_moves();

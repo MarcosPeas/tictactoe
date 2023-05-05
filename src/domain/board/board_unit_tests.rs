@@ -120,7 +120,7 @@ fn should_return_b_when_has_a_diagonal_match() {
     match board.get_result() {
         super::board::RoundResult::A(_) => assert!(false),
         super::board::RoundResult::B(_) => assert!(true),
-        super::board::RoundResult::Drow => assert!(false),
+        super::board::RoundResult::Draw => assert!(false),
         super::board::RoundResult::NoFinished => assert!(false),
     }
 }
@@ -134,7 +134,7 @@ fn should_return_a_when_has_horizontal_match() {
     match board.get_result() {
         super::board::RoundResult::A(_) => assert!(true),
         super::board::RoundResult::B(_) => assert!(false),
-        super::board::RoundResult::Drow => assert!(false),
+        super::board::RoundResult::Draw => assert!(false),
         super::board::RoundResult::NoFinished => assert!(false),
     }
 }
@@ -148,7 +148,7 @@ fn should_return_b_when_has_vertical_match() {
     match board.get_result() {
         super::board::RoundResult::A(_) => assert!(false),
         super::board::RoundResult::B(_) => assert!(true),
-        super::board::RoundResult::Drow => assert!(false),
+        super::board::RoundResult::Draw => assert!(false),
         super::board::RoundResult::NoFinished => assert!(false),
     }
 }
@@ -169,7 +169,7 @@ fn should_return_drow_to_finisher_when_the_board_is_full() {
     match board.get_result() {
         super::board::RoundResult::A(_) => assert!(false),
         super::board::RoundResult::B(_) => assert!(false),
-        super::board::RoundResult::Drow => assert!(true),
+        super::board::RoundResult::Draw => assert!(true),
         super::board::RoundResult::NoFinished => assert!(false),
     }
 }
