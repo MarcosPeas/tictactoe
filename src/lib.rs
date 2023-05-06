@@ -15,8 +15,8 @@ use crate::domain::tile::tile::PieceType;
 mod domain;
 mod infra;
 
-#[no_mangle]
-pub unsafe extern fn Java_com_peas_tictactoe_flutter_1project_FlutterProjectPlugin_execute(env: JNIEnv, _: JObject, j_recipient: JString) -> jstring {
+#[no_mangle] //com.helmetsoft.tictactoe
+pub unsafe extern fn Java_com_helmetsoft_tictactoe_tictactoe_MainActivity_execute(env: JNIEnv, _: JObject, j_recipient: JString) -> jstring {
     let recipient = CString::from(
         CStr::from_ptr(
             env.get_string(j_recipient).unwrap().as_ptr()

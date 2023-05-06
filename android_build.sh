@@ -7,7 +7,7 @@ cargo ndk --target x86_64-linux-android -- build --release
 
 
 
-jniLibs=../../flutter_project/android/src/main/jniLibs
+jniLibs=../../tictactoe/android/app/src/main/jniLibs
 libName=librustylib.so
 
 rm -rf ${jniLibs}

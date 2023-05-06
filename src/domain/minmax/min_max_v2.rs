@@ -6,8 +6,8 @@ use std::{
 use rand::Rng;
 
 use crate::domain::{
-    board::board::Board,
-    tile::tile::{PieceType, Tile},
+    board::tic_tac_toe_board::TicTacToeBoard,
+    tile::tic_tac_toe_tile::{PieceType, Tile},
 };
 
 pub struct MinMax;
@@ -17,16 +17,16 @@ impl MinMax {
         MinMax {}
     }
 
-    pub fn execute(&self, board: Board, piece_type: PieceType) -> Tile {
+    pub fn execute(&self, board: TicTacToeBoard, piece_type: PieceType) -> Tile {
         let moves = board.get_valids_moves();
         println!("Valid moves: {}", moves.len());
         if moves.len() >= 20 {
             return self.execute_on_multi_thread(board, piece_type);
         }
-        return self.execute_on_sigle_thread(board, piece_type);
+        self.execute_on_sigle_thread(board, piece_type)
     }
 
-    fn execute_on_sigle_thread(&self, board: Board, piece_type: PieceType) -> Tile {
+    fn execute_on_sigle_thread(&self, board: TicTacToeBoard, piece_type: PieceType) -> Tile {
         let valid_moves = board.get_valids_moves();
         let mut points_result: Vec<i8> = Vec::new();
         let mut indexes: Vec<i8> = Vec::new();
@@ -37,25 +37,25 @@ impl MinMax {
         };
         for i in 0..valid_moves.len() {
             let mut cloned_board = board.clone();
-            let mut tile_move = valid_moves.get(i).unwrap().clone();
-            tile_move.add_piece(piece_type.clone());
+            let mut tile_move = *valid_moves.get(i).unwrap();
+            tile_move.add_piece(piece_type);
             cloned_board.do_move(tile_move);
             let value = self.min_max(&cloned_board, &next_type_move.clone(), false);
             points_result.push(value);
             indexes.push(i.try_into().unwrap());
         }
-        return self.better_value(valid_moves, points_result);
+        self.better_value(valid_moves, points_result)
     }
 
-    fn execute_on_multi_thread(&self, board: Board, piece_type: PieceType) -> Tile {
+    fn execute_on_multi_thread(&self, board: TicTacToeBoard, piece_type: PieceType) -> Tile {
         let (tx, rx) = mpsc::channel();
         let valid_moves = board.get_valids_moves();
         let mut points_result: Vec<i8> = Vec::new();
 
         for i in 0..valid_moves.len() {
             let mut cloned_board = board.clone();
-            let mut tile_move = valid_moves.get(i).unwrap().clone();
-            tile_move.add_piece(piece_type.clone());
+            let mut tile_move = *valid_moves.get(i).unwrap();
+            tile_move.add_piece(piece_type);
             cloned_board.do_move(tile_move);
             let tx1 = tx.clone();
             let next_type_move = if piece_type == PieceType::A {
@@ -80,24 +80,24 @@ impl MinMax {
             } 
         }
 
-        return self.better_value(valid_moves, points_result);
+        self.better_value(valid_moves, points_result)
     }
 
-    fn min_max(&self, board: &Board, piece_type: &PieceType, is_max: bool) -> i8 {
+    fn min_max(&self, board: &TicTacToeBoard, piece_type: i8, is_max: bool) -> i8 {
         let result = board.get_result();
         match result {
-            crate::domain::board::board::RoundResult::A(_) => 1,
-            crate::domain::board::board::RoundResult::B(_) => -1,
-            crate::domain::board::board::RoundResult::Draw => 0,
-            crate::domain::board::board::RoundResult::NoFinished => {
+            crate::domain::board::tic_tac_toe_board::RoundResult::A(_) => 1,
+            crate::domain::board::tic_tac_toe_board::RoundResult::B(_) => -1,
+            crate::domain::board::tic_tac_toe_board::RoundResult::Draw => 0,
+            crate::domain::board::tic_tac_toe_board::RoundResult::NoFinished => {
                 let mut points: Vec<i8> = Vec::new();
                 let moves = board.get_valids_moves();
                 for movement in moves {
                     let mut cloned_board = board.clone();
-                    let mut board_move = movement.clone();
-                    board_move.add_piece(piece_type.clone());
+                    let mut board_move = movement;
+                    board_move.add_piece(piece_type);
                     cloned_board.do_move(board_move);
-                    let next_type_move = if *piece_type == PieceType::A {
+                    let next_type_move = if piece_type == 1 {
                         PieceType::B
                     } else {
                         PieceType::A
@@ -107,21 +107,21 @@ impl MinMax {
                     points.push(request_points);
                 }
                 if is_max {
-                    return self.max(&points);
+                    self.max(&points)
                 } else {
-                    return self.min(&points);
+                    self.min(&points)
                 }
             }
         }
     }
 
-    fn min(&self, points: &Vec<i8>) -> i8 {
+    fn min(&self, points: &[i8]) -> i8 {
         let mut min = i8::MAX;
         points.iter().for_each(|p| min = i8::min(min, *p));
         min
     }
 
-    fn max(&self, points: &Vec<i8>) -> i8 {
+    fn max(&self, points: &[i8]) -> i8 {
         let mut max = i8::MIN;
         points.iter().for_each(|p| max = i8::max(max, *p));
         max
@@ -133,7 +133,7 @@ impl MinMax {
         for i in 0..points.len() {
             let tile_points = points[i];
             if tile_points == max_value {
-                max_tiles.push(tiles[i].clone());
+                max_tiles.push(tiles[i]);
             }
         }
         let mut rng = rand::thread_rng();
@@ -141,6 +141,6 @@ impl MinMax {
         println!("All points: {:?}", points);
         println!("Max tiles count: {:?}", max_tiles.len());
         println!("Max tiles: {:?}", max_tiles);
-        return max_tiles.get(i).unwrap().clone();
+        return *max_tiles.get(i).unwrap();
     }
 }

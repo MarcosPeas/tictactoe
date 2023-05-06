@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 pub struct Tile {
     pub x: u8,
     pub y: u8,
-    pub piece: PieceType,
+    pub piece: i8,
 }
 
 impl Tile {
@@ -12,11 +12,11 @@ impl Tile {
         Tile {
             x,
             y,
-            piece: PieceType::None,
+            piece: 0,
         }
     }
 
-    pub fn add_piece(&mut self, piece: PieceType) {
+    pub fn add_piece(&mut self, piece: i8) {
         self.piece = piece;
     }
 
