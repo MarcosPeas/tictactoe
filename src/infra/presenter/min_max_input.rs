@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use crate::domain::{tile::tic_tac_toe_tile::{PieceType}, board::tic_tac_toe_board::TicTacToeBoard};
+use crate::domain::board::tic_tac_toe_board::TicTacToeBoard;
+
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct MinMaxInput {
+pub struct MiniMaxInput {
     pub board: TicTacToeBoard,
-    pub piece: PieceType,
+    pub piece: i8,
 }

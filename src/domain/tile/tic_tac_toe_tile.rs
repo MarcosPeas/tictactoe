@@ -24,10 +24,3 @@ impl Tile {
         format!("{}-{}", self.x.clone(), self.y.clone())
     }
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Copy)]
-pub enum PieceType {
-    A,
-    B,
-    None,
-}

@@ -1,4 +1,4 @@
-use std::{clone, sync::mpsc, thread};
+use std::{sync::mpsc, thread};
 
 use rand::Rng;
 
@@ -18,7 +18,7 @@ impl MiniMax {
 
     pub fn execute(&mut self) -> Tile {
         let moves = self.board.get_valids_moves();
-        if moves.len() >= 6 {
+        if moves.len() > 8 {
             return self.execute_on_multi_thread();
         }
         self.execute_on_sigle_thread()
@@ -47,8 +47,8 @@ impl MiniMax {
         for tile in moves {
             let mut cloned_board = self.board.clone();
             cloned_board.do_move(tile.x, tile.y, 1);
-            cloned_board.print();
-            println!();
+            //cloned_board.print();
+            //println!();
             let tx1 = tx.clone();
             thread::spawn(move || {
                 let mut min_max = MiniMax::new(cloned_board);
@@ -71,7 +71,7 @@ impl MiniMax {
 
     pub fn mini_max(&mut self, ply: i8) -> i8 {
         let result = self.board.get_result();
-        return match result {
+        match result {
             RoundResult::A(_) => 1,
             RoundResult::B(_) => -1,
             RoundResult::Draw => 0,
@@ -79,18 +79,23 @@ impl MiniMax {
                 let mut results: Vec<i8> = vec![];
                 let moves = self.board.get_valids_moves();
                 for tile in &moves {
-                    self.board
-                        .do_move(tile.x, tile.y, if ply < 0 { -1 } else { 1 });
-                    let value = self.mini_max(-ply);
+                    let direction = if ply < 0 { -1 } else { 1 };
+                    self.board.do_move(tile.x, tile.y, direction);
+                    let value = self.mini_max(-ply);                    
                     results.push(value);
                     self.board.do_move(tile.x, tile.y, 0);
+                    if ply < 0 && value < 0 {
+                        return value;
+                    } else if ply > 0 && value > 0 {
+                        return value;
+                    }
                 }
                 if ply < 0 {
                     return self.min(&results);
                 }
                 self.max(&results)
             }
-        };
+        }
     }
 
     fn min(&self, points: &[i8]) -> i8 {
@@ -116,9 +121,9 @@ impl MiniMax {
         }
         let mut rng = rand::thread_rng();
         let i = rng.gen_range(0..max_tiles.len());
-        println!("All points: {:?}", points);
-        println!("Max tiles count: {:?}", max_tiles.len());
-        println!("Max tiles: {:?}", max_tiles);
+        //println!("All points: {:?}", points);
+        //println!("Max tiles count: {:?}", max_tiles.len());
+        //println!("Max tiles: {:?}", max_tiles);
         return *max_tiles.get(i).unwrap();
     }
 }

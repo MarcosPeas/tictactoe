@@ -225,7 +225,7 @@ impl TicTacToeBoard {
         }
     }
 
-    pub fn print(&self) {
+    /*pub fn print(&self) {
         for x in 0..self.height {
             for y in 0..self.width {
                 let id = format!("{}-{}", x, y);
@@ -234,7 +234,7 @@ impl TicTacToeBoard {
             }
             println!();
         }
-    }
+    }*/
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
