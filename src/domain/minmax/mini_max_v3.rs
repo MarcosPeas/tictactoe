@@ -5,6 +5,7 @@ use rand::Rng;
 use crate::domain::{
     board::tic_tac_toe_board::{RoundResult, TicTacToeBoard},
     tile::tic_tac_toe_tile::Tile,
+    trail::trail::Trail,
 };
 
 pub struct MiniMax {
@@ -18,7 +19,7 @@ impl MiniMax {
 
     pub fn execute(&mut self) -> Tile {
         let moves = self.board.get_valids_moves();
-        if moves.len() > 8 {
+        if moves.len() > 5 {
             return self.execute_on_multi_thread();
         }
         self.execute_on_sigle_thread()
@@ -28,11 +29,11 @@ impl MiniMax {
         let mut results: Vec<i8> = vec![];
         let moves = self.board.get_valids_moves();
 
-        for tile in &moves {
-            self.board.do_move(tile.x, tile.y, 1);
+        for trail in &moves {
+            self.board.do_move(trail.head.x, trail.head.y, 1);
             let value = self.mini_max(-1);
             results.push(value);
-            self.board.do_move(tile.x, tile.y, 0);
+            self.board.do_move(trail.head.x, trail.head.y, 0);
         }
 
         self.better_value(moves, results)
@@ -40,24 +41,24 @@ impl MiniMax {
 
     pub fn execute_on_multi_thread(&mut self) -> Tile {
         let mut results: Vec<i8> = vec![];
-        let mut tiles_results: Vec<Tile> = vec![];
+        let mut tiles_results: Vec<Trail> = vec![];
         let moves = self.board.get_valids_moves();
 
         let (tx, rx) = mpsc::channel();
-        for tile in moves {
+        for trail in moves {
             let mut cloned_board = self.board.clone();
-            cloned_board.do_move(tile.x, tile.y, 1);
+            cloned_board.do_move(trail.head.x, trail.head.y, 1);
             //cloned_board.print();
             //println!();
             let tx1 = tx.clone();
             thread::spawn(move || {
                 let mut min_max = MiniMax::new(cloned_board);
                 let tile_points = min_max.mini_max(-1);
-                tx1.send((tile_points, tile)).unwrap();
+                tx1.send((tile_points, trail)).unwrap();
             });
         }
         thread::spawn(move || {
-            tx.send((i8::MIN, Tile::new(0, 0))).unwrap();
+            tx.send((i8::MIN, Trail::new(Tile::new(0, 0)))).unwrap();
         });
         let clonned = rx.into_iter();
         for received in clonned {
@@ -78,15 +79,16 @@ impl MiniMax {
             RoundResult::NoFinished => {
                 let mut results: Vec<i8> = vec![];
                 let moves = self.board.get_valids_moves();
-                for tile in &moves {
+                for trail in &moves {
                     let direction = if ply < 0 { -1 } else { 1 };
-                    self.board.do_move(tile.x, tile.y, direction);
-                    let value = self.mini_max(-ply);                    
+                    self.board.do_move(trail.head.x, trail.head.y, direction);
+                    let value = self.mini_max(-ply);
                     results.push(value);
-                    self.board.do_move(tile.x, tile.y, 0);
+                    self.board.do_move(trail.head.x, trail.head.y, 0);
                     if ply < 0 && value < 0 {
                         return value;
-                    } else if ply > 0 && value > 0 {
+                    }
+                    if ply > 0 && value > 0 {
                         return value;
                     }
                 }
@@ -110,20 +112,20 @@ impl MiniMax {
         max
     }
 
-    fn better_value(&self, tiles: Vec<Tile>, points: Vec<i8>) -> Tile {
+    fn better_value(&self, trails: Vec<Trail>, points: Vec<i8>) -> Tile {
         let max_value = self.max(&points);
-        let mut max_tiles: Vec<Tile> = Vec::new();
+        let mut max_trail: Vec<Trail> = Vec::new();
         for i in 0..points.len() {
             let tile_points = points[i];
             if tile_points == max_value {
-                max_tiles.push(tiles[i]);
+                max_trail.push(trails[i].clone());
             }
         }
         let mut rng = rand::thread_rng();
-        let i = rng.gen_range(0..max_tiles.len());
+        let i = rng.gen_range(0..max_trail.len());
         //println!("All points: {:?}", points);
         //println!("Max tiles count: {:?}", max_tiles.len());
         //println!("Max tiles: {:?}", max_tiles);
-        return *max_tiles.get(i).unwrap();
+        return max_trail.get(i).unwrap().head;
     }
 }

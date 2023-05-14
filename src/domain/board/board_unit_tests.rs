@@ -200,7 +200,7 @@ fn should_return_true_when_is_full() {
 
 #[test]
 fn should_return_nine_free_tiles(){
-    let board = crate::domain::board::tic_tac_toe_board::TicTacToeBoard::emtpy_3x3();
+    let board  = crate::domain::board::tic_tac_toe_board::TicTacToeBoard::emtpy_3x3();
     let moves = board.get_valids_moves();
     assert_eq!(moves.len(), 9);
 }

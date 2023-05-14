@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::domain::tile::tic_tac_toe_tile::Tile;
+use crate::domain::{tile::tic_tac_toe_tile::Tile, trail::trail::Trail};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TicTacToeBoard {
     tiles: HashMap<String, Tile>,
     pub width: u8,
@@ -15,7 +15,55 @@ impl TicTacToeBoard {
     pub fn emtpy_3x3() -> Self {
         TicTacToeBoard::from_size(3, 3)
     }
+    pub fn get_valids_moves(&self) -> Vec<Trail> {
+        let mut free_tiles: Vec<Trail> = Vec::new();
+        for _x in 0..self.height {
+            for _y in 0..self.width {
+                let id = format!("{}-{}", _x, _y);
+                let tile = *self.tiles.get(&id).unwrap();
+                if tile.piece == 0 {
+                    free_tiles.push(Trail::new(tile));
+                }
+            }
+        }
+        free_tiles
+    }
 
+    pub fn do_move(&mut self, x: u8, y: u8, piece: i8) {
+        let tile = Tile { x, y, piece };
+        self.tiles.insert(tile.get_id(), tile);
+    }
+
+    pub fn get_result(&self) -> RoundResult {
+        let result = self.matches(1);
+        if !result.is_empty() {
+            return RoundResult::A(result);
+        }
+        let result = self.matches(-1);
+        if !result.is_empty() {
+            return RoundResult::B(result);
+        }
+        if self.is_full() {
+            return RoundResult::Draw;
+        }
+        RoundResult::NoFinished
+    }
+
+    pub fn matches(&self, piece_type: i8) -> Vec<Tile> {
+        let mut result = vec![];
+        result.append(&mut self.verify_vertical(piece_type));
+        result.append(&mut self.verify_horizontal(piece_type));
+        result.append(&mut self.verify_diagonal(piece_type));
+        result
+    }
+
+    pub fn clone(&self) -> Self {
+        TicTacToeBoard {
+            height: self.height,
+            width: self.height,
+            tiles: self.tiles.clone(),
+        }
+    }
     pub fn from_size(x: u8, y: u8) -> Self {
         let mut board = TicTacToeBoard {
             tiles: HashMap::default(),
@@ -30,26 +78,6 @@ impl TicTacToeBoard {
         board
     }
 
-    pub fn do_move(&mut self, x: u8, y: u8, piece: i8) {
-        let tile = Tile { x, y, piece };
-        self.tiles.insert(tile.get_id(), tile);
-    }
-
-    pub fn get_result(&self) -> RoundResult {
-        let result = self.clone().matches(1);
-        if !result.is_empty() {
-            return RoundResult::A(result);
-        }
-        let result = self.clone().matches(-1);
-        if !result.is_empty() {
-            return RoundResult::B(result);
-        }
-        if self.is_full() {
-            return RoundResult::Draw;
-        }
-        RoundResult::NoFinished
-    }
-
     pub fn is_full(&self) -> bool {
         let tiles = self.tiles.clone();
         for _x in 0..self.height {
@@ -62,28 +90,6 @@ impl TicTacToeBoard {
             }
         }
         true
-    }
-
-    pub fn get_valids_moves(&self) -> Vec<Tile> {
-        let mut free_tiles: Vec<Tile> = Vec::new();
-        for _x in 0..self.height {
-            for _y in 0..self.width {
-                let id = format!("{}-{}", _x, _y);
-                let tile = *self.tiles.get(&id).unwrap();
-                if tile.piece == 0 {
-                    free_tiles.push(tile);
-                }
-            }
-        }
-        free_tiles
-    }
-
-    pub fn matches(self, piece_type: i8) -> Vec<Tile> {
-        let mut result = vec![];
-        result.append(&mut self.verify_vertical(piece_type));
-        result.append(&mut self.verify_horizontal(piece_type));
-        result.append(&mut self.verify_diagonal(piece_type));
-        result
     }
 
     fn verify_vertical(&self, piece_type: i8) -> Vec<Tile> {

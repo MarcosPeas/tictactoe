@@ -15,6 +15,7 @@ fn should_return_a_victory_tile() {
     let piece = 1;
     let mut board = TicTacToeBoard::emtpy_3x3();
     //board.do_move(1, 1, -1);
+    //board.do_move(1, 1, -1);
     if piece == -1 {
         board = board.reverse();
     }
